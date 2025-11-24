@@ -1,5 +1,3 @@
-import { reactive } from 'vue';
-
 export interface ICommand {
   execute(): void;
   undo(): void;
@@ -8,40 +6,50 @@ export interface ICommand {
 const MAX_HISTORY = 50;
 
 export class HistoryManager {
-  private undoStack: ICommand[] = [];
-  private redoStack: ICommand[] = [];
+  private history: ICommand[] = [];
+  private pointer: number = -1;
   private maxHistory: number;
 
   constructor(maxHistory = MAX_HISTORY) {
     this.maxHistory = maxHistory;
   }
 
+  private checkEndAndTruncate() {
+    if (this.pointer < this.history.length - 1) {
+      this.history = this.history.slice(0, this.pointer + 1);
+    }
+  }
+
   execute(command: ICommand) {
     command.execute();
-    this.undoStack.push(command);
-    this.redoStack = [];
 
-    if (this.undoStack.length > this.maxHistory) {
-      this.undoStack.shift();
+    this.checkEndAndTruncate();
+
+    this.history.push(command);
+    this.pointer++;
+
+    if (this.history.length > this.maxHistory) {
+      this.history.shift();
+      this.pointer--;
     }
   }
 
   undo() {
-    const command = this.undoStack.pop();
-    if (command) {
+    if (this.pointer >= 0) {
+      const command = this.history[this.pointer];
       command.undo();
-      this.redoStack.push(command);
+      this.pointer--;
     }
   }
 
   redo() {
-    const command = this.redoStack.pop();
-    if (command) {
+    if (this.pointer < this.history.length - 1) {
+      this.pointer++;
+      const command = this.history[this.pointer];
       command.execute();
-      this.undoStack.push(command);
     }
   }
 
-  get canUndo() { return this.undoStack.length > 0; }
-  get canRedo() { return this.redoStack.length > 0; }
+  get canUndo() { return this.pointer >= 0; }
+  get canRedo() { return this.pointer < this.history.length - 1; }
 }
