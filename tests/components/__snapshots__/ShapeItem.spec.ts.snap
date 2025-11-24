@@ -6,4 +6,4 @@ exports[`ShapeItem.vue > renders correctly when not selected (Snapshot) 1`] = `
 </div>"
 `;
 
-exports[`ShapeItem.vue > renders correctly when selected (Snapshot) 1`] = `"<div data-v-af5ab15d="" class="shape-item is-selected" style="transform: translate(50px, 100px); width: 200px; height: 150px; background-color: #ff0000;" data-test="shape-item"><span data-v-af5ab15d="" class="debug-label">rectangle</span></div>"`;
+exports[`ShapeItem.vue > renders correctly when selected (Snapshot) 1`] = `"<div data-v-af5ab15d="" class="shape-item shape-item--is-selected" style="transform: translate(50px, 100px); width: 200px; height: 150px; background-color: #ff0000;" data-test="shape-item"><span data-v-af5ab15d="" class="shape-item__debug-label">rectangle</span></div>"`;
