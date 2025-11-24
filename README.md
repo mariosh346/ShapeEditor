@@ -74,3 +74,57 @@ state: {
     ```bash
     npm run test
     ```
+
+
+## Developer Guide: Adding a New Command
+
+To add a new undoable action (e.g., "Rotate Shape"), follow these steps:
+
+1.  **Create a Command Class**:
+    Create a new class in `src/model/ShapeCommands.ts` that implements the `ICommand` interface.
+
+    ```typescript
+    import type { ICommand } from '@/core/HistoryManager';
+    import type { CanvasStoreActions } from '@/store/canvasStore';
+
+    export class RotateShapeCommand implements ICommand {
+      private oldRotation: number;
+
+      constructor(
+        private store: CanvasStoreActions,
+        private shapeId: string,
+        private newRotation: number
+      ) {
+        const shape = store.getShapeById(shapeId);
+        if (!shape) throw new Error(`Shape ${shapeId} not found`);
+        this.oldRotation = shape.rotation || 0;
+      }
+
+      execute() {
+        this.store._rawUpdateShape(this.shapeId, { rotation: this.newRotation });
+      }
+
+      undo() {
+        this.store._rawUpdateShape(this.shapeId, { rotation: this.oldRotation });
+      }
+    }
+    ```
+
+2.  **Expose an Action in the Store**:
+    In `src/store/canvasStore.ts`, add an action that instantiates and executes your command.
+
+    ```typescript
+    // src/store/canvasStore.ts
+    function rotateShape(id: string, rotation: number) {
+      history.execute(new RotateShapeCommand(actionsContext, id, rotation));
+    }
+
+    // Don't forget to return it in the store definition
+    return {
+        // ... other exports
+        rotateShape,
+    }
+    ```
+
+3.  **Trigger from UI**:
+    Call the store action from your Vue component.
